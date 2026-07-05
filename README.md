@@ -51,8 +51,5 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser to view the application!
 
-## 📸 Screenshots
-*(You can drop the screenshots of your dashboard and categories here when pushing to GitHub)*
-
 ## 📄 License
 This project is open-source and available under the MIT License.
