@@ -65,8 +65,8 @@ export function DashboardPage() {
 
   if (isError) {
     return (
-      <div className="alert alert-error">
-        <AlertCircle size={16} style={{ marginTop: '2px' }} />
+      <div className="alert alert-error" role="alert">
+        <AlertCircle size={16} style={{ marginTop: '2px' }} aria-hidden="true" />
         <div>
           <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Failed to load dashboard</p>
           <p>{error instanceof Error ? error.message : 'An unknown error occurred.'}</p>
@@ -87,7 +87,8 @@ export function DashboardPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* ── Stat Cards ──────────────────────────────────────────────────────── */}
-      <div
+      <section
+        aria-label="Financial summary"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -97,12 +98,15 @@ export function DashboardPage() {
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="label">Total Balance</p>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0' }}>
+              <p className="label" id="stat-balance-label">Total Balance</p>
+              <p
+                aria-labelledby="stat-balance-label"
+                style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0', color: 'var(--color-text-primary)' }}
+              >
                 {formatCurrency(data.balance)}
-              </h2>
+              </p>
             </div>
-            <div style={{ padding: '0.625rem', background: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ padding: '0.625rem', background: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: 'var(--radius-md)' }} aria-hidden="true">
               <Wallet size={20} />
             </div>
           </div>
@@ -111,12 +115,15 @@ export function DashboardPage() {
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="label">Monthly Income</p>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0' }}>
+              <p className="label" id="stat-income-label">Monthly Income</p>
+              <p
+                aria-labelledby="stat-income-label"
+                style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0', color: 'var(--color-income)' }}
+              >
                 {formatCurrency(data.monthly.income)}
-              </h2>
+              </p>
             </div>
-            <div style={{ padding: '0.625rem', background: 'var(--color-income-bg)', color: 'var(--color-income)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ padding: '0.625rem', background: 'var(--color-income-bg)', color: 'var(--color-income)', borderRadius: 'var(--radius-md)' }} aria-hidden="true">
               <TrendingUp size={20} />
             </div>
           </div>
@@ -125,12 +132,15 @@ export function DashboardPage() {
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="label">Monthly Expenses</p>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0' }}>
+              <p className="label" id="stat-expenses-label">Monthly Expenses</p>
+              <p
+                aria-labelledby="stat-expenses-label"
+                style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0', color: 'var(--color-expense)' }}
+              >
                 {formatCurrency(data.monthly.expenses)}
-              </h2>
+              </p>
             </div>
-            <div style={{ padding: '0.625rem', background: 'var(--color-expense-bg)', color: 'var(--color-expense)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ padding: '0.625rem', background: 'var(--color-expense-bg)', color: 'var(--color-expense)', borderRadius: 'var(--radius-md)' }} aria-hidden="true">
               <TrendingDown size={20} />
             </div>
           </div>
@@ -139,20 +149,24 @@ export function DashboardPage() {
         <div className="stat-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p className="label">Transactions (This Month)</p>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0' }}>
+              <p className="label" id="stat-count-label">Transactions (This Month)</p>
+              <p
+                aria-labelledby="stat-count-label"
+                style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0.25rem 0 0', color: 'var(--color-text-primary)' }}
+              >
                 {data.monthly.transactionCount}
-              </h2>
+              </p>
             </div>
-            <div style={{ padding: '0.625rem', background: 'var(--color-surface-2)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ padding: '0.625rem', background: 'var(--color-surface-2)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-md)' }} aria-hidden="true">
               <Activity size={20} />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── Charts Section ──────────────────────────────────────────────────── */}
-      <div
+      <section
+        aria-label="Financial charts"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
@@ -163,7 +177,11 @@ export function DashboardPage() {
         <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, marginBottom: '1.5rem' }}>Cash Flow (6 Months)</h3>
           {data.chartData.length > 0 ? (
-            <div style={{ height: '300px', width: '100%' }}>
+            <div
+              style={{ height: '300px', width: '100%' }}
+              aria-label={`Cash flow chart for the last 6 months. Latest month income: ${formatCurrency(data.chartData[data.chartData.length - 1]?.income ?? 0)}, expenses: ${formatCurrency(data.chartData[data.chartData.length - 1]?.expenses ?? 0)}.`}
+              role="img"
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
@@ -189,7 +207,11 @@ export function DashboardPage() {
         <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, marginBottom: '1.5rem' }}>Top Expenses (This Month)</h3>
           {data.categoryBreakdown.length > 0 ? (
-            <div style={{ height: '300px', width: '100%' }}>
+            <div
+              style={{ height: '300px', width: '100%' }}
+              aria-label={`Top expenses chart. Largest category: ${data.categoryBreakdown[0]?.categoryName ?? 'N/A'} at ${data.categoryBreakdown[0]?.percentage ?? 0}%.`}
+              role="img"
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.categoryBreakdown} layout="vertical" margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--color-border)" />
@@ -217,7 +239,7 @@ export function DashboardPage() {
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { transactionsApi, categoriesApi } from '../../api/axios'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 interface TransactionModalProps {
   isOpen: boolean
@@ -18,7 +19,12 @@ interface TransactionModalProps {
 
 export function TransactionModal({ isOpen, onClose, transaction }: TransactionModalProps) {
   const queryClient = useQueryClient()
-  
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const titleId = 'transaction-modal-title'
+
+  // Trap focus inside modal; Escape key calls onClose
+  useFocusTrap(dialogRef, isOpen, onClose)
+
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -33,7 +39,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const categories = (categoriesRes?.data?.data as Array<{ _id: string; name: string; type: string }>) ?? []
-  
+
   // Filter categories by selected transaction type (or 'both')
   const filteredCategories = categories.filter(c => c.type === type || c.type === 'both')
 
@@ -67,7 +73,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
   }, [type, filteredCategories, categoryId])
 
   const mutation = useMutation({
-    mutationFn: (data: any) => {
+    mutationFn: (data: unknown) => {
       if (transaction) {
         return transactionsApi.update(transaction._id, data)
       }
@@ -85,7 +91,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!amount || !categoryId || !date) return
-    
+
     mutation.mutate({
       type,
       amount: parseFloat(amount),
@@ -96,40 +102,75 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+    // Overlay — clicking outside closes the dialog
+    <div
+      className="modal-overlay"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      {/* Dialog container */}
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
-          <h2 className="modal-title">{transaction ? 'Edit Transaction' : 'New Transaction'}</h2>
-          <button onClick={onClose} className="btn btn-ghost" style={{ padding: '0.25rem' }}>
-            <X size={20} />
+          <h2 id={titleId} className="modal-title">
+            {transaction ? 'Edit Transaction' : 'New Transaction'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="btn btn-ghost"
+            style={{ padding: '0.25rem' }}
+            aria-label="Close dialog"
+          >
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <div className="form-field" style={{ flexDirection: 'row', gap: '1rem', background: 'var(--color-surface-2)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
+          {/* Type toggle — uses aria-pressed to signal selection state */}
+          <fieldset style={{ border: 'none', padding: 0, marginBottom: '1rem' }}>
+            <legend className="sr-only">Transaction type</legend>
+            <div
+              className="form-field"
+              style={{ flexDirection: 'row', gap: '1rem', background: 'var(--color-surface-2)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}
+            >
               <button
                 type="button"
+                id="tx-type-expense"
                 className={`btn ${type === 'expense' ? 'btn-danger' : 'btn-ghost'}`}
                 style={{ flex: 1 }}
+                aria-pressed={type === 'expense'}
                 onClick={() => setType('expense')}
               >
                 Expense
               </button>
               <button
                 type="button"
+                id="tx-type-income"
                 className={`btn ${type === 'income' ? 'btn-primary' : 'btn-ghost'}`}
                 style={{ flex: 1 }}
+                aria-pressed={type === 'income'}
                 onClick={() => setType('income')}
               >
                 Income
               </button>
             </div>
+          </fieldset>
 
+          <div className="form-group">
             <div className="form-field">
               <label htmlFor="tx-amount" className="label">Amount</label>
               <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>$</span>
+                <span
+                  aria-hidden="true"
+                  style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}
+                >
+                  $
+                </span>
                 <input
                   id="tx-amount"
                   type="number"
@@ -141,6 +182,8 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
+                  aria-required="true"
+                  aria-describedby={mutation.isError ? 'tx-save-error' : undefined}
                 />
               </div>
             </div>
@@ -154,6 +197,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
+                aria-required="true"
               />
             </div>
 
@@ -165,6 +209,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 required
+                aria-required="true"
               >
                 {filteredCategories.length === 0 ? (
                   <option value="" disabled>No categories available</option>
@@ -192,12 +237,23 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
             <button type="button" onClick={onClose} className="btn btn-ghost">Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={mutation.isPending || !categoryId}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={mutation.isPending || !categoryId}
+              aria-disabled={mutation.isPending || !categoryId}
+            >
               {mutation.isPending ? 'Saving…' : 'Save Transaction'}
             </button>
           </div>
+
+          {/* Live region: announced automatically by screen readers on error */}
           {mutation.isError && (
-            <p style={{ color: 'var(--color-expense)', fontSize: '0.8125rem', marginTop: '1rem', textAlign: 'center' }}>
+            <p
+              id="tx-save-error"
+              role="alert"
+              style={{ color: 'var(--color-expense)', fontSize: '0.8125rem', marginTop: '1rem', textAlign: 'center' }}
+            >
               Failed to save transaction. Please try again.
             </p>
           )}

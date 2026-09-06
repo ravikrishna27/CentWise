@@ -89,7 +89,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen }: SidebarProps) {
                 flexShrink: 0,
               }}
             >
-              <Logo size={18} color="white" />
+              <Logo size={20} gradient color="white" />
             </div>
             <span
               style={{
@@ -140,6 +140,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen }: SidebarProps) {
                   id={`nav-${label.toLowerCase()}`}
                   to={to}
                   onClick={onClose}
+                  aria-current={undefined} // set below via render prop
                   style={({ isActive }) => ({
                     display: 'flex',
                     alignItems: 'center',
@@ -164,8 +165,10 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen }: SidebarProps) {
                         size={17}
                         strokeWidth={isActive ? 2.5 : 2}
                         style={{ flexShrink: 0 }}
+                        aria-hidden="true"
                       />
-                      {label}
+                      <span>{label}</span>
+                      {isActive && <span className="sr-only">(current page)</span>}
                     </>
                   )}
                 </NavLink>
@@ -241,6 +244,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen }: SidebarProps) {
             id="btn-logout"
             onClick={handleLogout}
             className="btn btn-ghost"
+            aria-label="Log out of CentWise"
             style={{
               width: '100%',
               justifyContent: 'flex-start',
@@ -249,7 +253,7 @@ export function Sidebar({ isOpen, onClose, isDesktopOpen }: SidebarProps) {
               color: 'var(--color-text-secondary)',
             }}
           >
-            <LogOut size={16} strokeWidth={2} />
+            <LogOut size={16} strokeWidth={2} aria-hidden="true" />
             Log out
           </button>
         </div>
