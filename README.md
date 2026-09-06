@@ -79,6 +79,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+<<<<<<< HEAD
 ## 📁 Project Structure
 
 ```
@@ -114,6 +115,8 @@ CentWise includes a comprehensive accessibility pass:
 - **Screen reader** — All interactive icons have `aria-hidden="true"`, all controls have descriptive labels, table headers use `scope="col"`.
 - **Focus rings** — Visible `:focus-visible` outlines on all buttons and inputs for keyboard users.
 
+=======
+>>>>>>> 8d88eb9bcc2159496bd38c83180e24e9886e92f4
 ## 📄 License
 
 This project is open-source and available under the [MIT License](LICENSE).
